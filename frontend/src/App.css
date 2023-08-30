@@ -1,0 +1,78 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes hover-animation {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animation-hovering{
+  animation: hover-animation 3s infinite ease-in-out alternate
+}
+
+.menus-bar:hover{
+  fill: #f5f76e;
+}
+
+.btn-getstarted{
+  background-color: #1e4fd4;
+  box-shadow: 0 5px 0 #112a71;
+}
+
+.btn-getstarted:active{
+  box-shadow: none;
+  transform: translateY(5px);
+}
+
+.underline-title{
+  padding-bottom: 5px;
+  border-bottom: 5px solid #daff49;
+}
+
+.btn-login{
+  background-color: #1CB0F6;
+  box-shadow: 0 5px 0 #1899D6;
+}
+
+.btn-login:active{
+  box-shadow: none;
+  transform: translateY(5px);
+}
+
+.btn-register{
+  background-color: #58CC02;
+  box-shadow: 0 5px 0 #58A700;
+}
+
+.btn-register:active{
+  box-shadow: none;
+  transform: translateY(5px);
+}
