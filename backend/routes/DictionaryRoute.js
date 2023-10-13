@@ -5,6 +5,7 @@ import {
   updateVocab,
   deleteVocab,
   getAllVocabs,
+  upload,
 } from "../controllers/Dictionary.js";
 
 import {
@@ -24,8 +25,8 @@ const limiter = rateLimit({
 
 router.get("/", verifyUser, getAllVocabs);
 router.get("/:uuid", verifyUser, getVocabByUUID);
-router.post("/", limiter, verifyUser, adminOnly, unauthorizedAccess, createVocab);
-router.patch("/:uuid", verifyUser, adminOnly, unauthorizedAccess, updateVocab);
+router.post("/", verifyUser, adminOnly, unauthorizedAccess, upload, createVocab);
+router.patch("/:uuid", verifyUser, adminOnly, unauthorizedAccess, upload, updateVocab);
 router.delete("/:uuid", verifyUser, adminOnly, unauthorizedAccess, deleteVocab);
 
 export default router;

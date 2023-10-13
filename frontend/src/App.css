@@ -76,3 +76,23 @@
   box-shadow: none;
   transform: translateY(5px);
 }
+
+.btn-level{
+  background-color: #58CC02;
+  box-shadow: 0 10px 0 #58A700;
+}
+
+.btn-level:active{
+  box-shadow: none;
+  transform: translateY(10px); 
+}
+
+.btn-unlevel{
+  background-color: #E5E5E5;
+  box-shadow: 0 10px 0 #AFAFAF;
+}
+
+.btn-unlevel:active{
+  box-shadow: none;
+  transform: translateY(10px);
+}

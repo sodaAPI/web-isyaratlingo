@@ -7,29 +7,81 @@ import Sidebar from "../../../components/SidebarLearning";
 const rolesList = ["user", "admin"];
 
 export default function editUser() {
+  const [uid, setUID] = useState("");
   const [name, setName] = useState("");
+  const [image, setImage] = useState(null); // Use null as initial state for image
   const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
   const [roles, setRoles] = useState(rolesList[0]);
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
-  const history = useNavigate();
+  const [score, setScore] = useState("");
+  const [point, setPoint] = useState("");
+  const [progresslevel, setProgressLevel] = useState("");
+  const [winstreak, setWinstreak] = useState("");
+  const [guard, setGuard] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
+  const [updatedAt, setUpdatedAt] = useState("");
   const { uuid } = useParams();
   const navigate = useNavigate();
 
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) {
+      return ""; // Return an empty string for undefined or empty timestamps
+    }
+    try {
+      const options = {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "Asia/Jakarta",
+      };
+      // Use a console.log to inspect the timestamp before passing it to the Date constructor
+      console.log("Input timestamp:", timestamp);
+
+      return new Intl.DateTimeFormat("en-US", options).format(
+        new Date(timestamp)
+      );
+    } catch (error) {
+      console.error("Error formatting timestamp:", error);
+      return ""; // Return an empty string for invalid timestamps
+    }
+  };
+
   const updateUser = async (e) => {
     e.preventDefault();
-    await axios.patch(`http://localhost:5000/user/${uuid}`, {
-      name: name,
-      email: email,
-      age: age,
-      roles: roles,
-      password: password,
-      confirmpassword:  confirmpassword,
-    });
-    let path = "/admin/dashboard/";
-    navigate(path);
-    window.alert("User Updated Successfully");
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("age", age);
+    formData.append("roles", roles);
+    formData.append("password", password);
+    formData.append("confirmpassword", confirmpassword);
+    formData.append("score", score);
+    formData.append("point", point);
+    formData.append("progresslevel", progresslevel);
+    formData.append("winstreak", winstreak);
+    formData.append("guard", guard);
+    formData.append("createdAt", createdAt);
+    formData.append("updatedAt", updatedAt);
+    if (image) {
+      formData.append("image", image);
+    }
+
+    try {
+      await axios.patch(`http://localhost:5000/user/${uuid}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Set the correct content type
+        },
+      });
+
+      let path = "/admin/dashboard/user";
+      navigate(path);
+      window.alert("Profile Updated Successfully");
+    } catch (error) {
+      console.error("Error Updated Profile:", error);
+      window.alert("Error Updated Profile.");
+    }
   };
 
   useEffect(() => {
@@ -38,11 +90,19 @@ export default function editUser() {
 
   const getUserById = async () => {
     const response = await axios.get(`http://localhost:5000/user/${uuid}`);
+    setUID(response.data.uuid);
     setName(response.data.name);
     setEmail(response.data.email);
     setAge(response.data.age);
     setRoles(response.data.roles);
     setPassword(response.data.password);
+    setScore(response.data.score);
+    setPoint(response.data.point);
+    setProgressLevel(response.data.progresslevel);
+    setWinstreak(response.data.winstreak);
+    setGuard(response.data.guard);
+    setCreatedAt(response.data.createdAt);
+    setUpdatedAt(response.data.updatedAt);
   };
 
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -57,17 +117,17 @@ export default function editUser() {
         <form onSubmit={updateUser}>
           <div>
             <section className="grid grid-cols-2 gap-6">
-              {/* Name */}
+              {/* UUID */}
 
               <div>
-                <label className="label font-bold">Name</label>
+                <label className="label font-bold">UUID</label>
                 <input
-                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
-                  type="name"
-                  placeholder="Name"
-                  value={name}
-                  required
-                  onChange={(e) => setName(e.target.value)}
+                  className="py-2 [width:300px] text-slate-500 font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="text"
+                  placeholder="UUID"
+                  value={uid}
+                  disabled
+                  onChange={(e) => setUID(e.target.value)}
                 />
               </div>
 
@@ -163,6 +223,32 @@ export default function editUser() {
                 </Listbox>
               </div>
 
+              {/* Name */}
+
+              <div>
+                <label className="label font-bold">Name</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="name"
+                  placeholder="Name"
+                  value={name}
+                  required
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+
+              {/* Image */}
+
+              <div>
+                <label className="label  font-bold">Photo Profile</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="file"
+                  accept="image/*" // Accept only image files
+                  onChange={(e) => setImage(e.target.files[0])}
+                />
+              </div>
+
               {/* Email */}
 
               <div>
@@ -174,20 +260,6 @@ export default function editUser() {
                   value={email}
                   required
                   onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-
-              {/* Password*/}
-
-              <div>
-                <label className="label font-bold ">Password</label>
-                <input
-                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
-                  type={passwordVisible ? "text" : "password"}
-                  placeholder={passwordVisible ? "Password" : "********"}
-                  value={password}
-                  required
-                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
 
@@ -205,6 +277,91 @@ export default function editUser() {
                 />
               </div>
 
+              {/* Score */}
+
+              <div>
+                <label className="label font-bold">Score</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="number"
+                  placeholder="Score"
+                  value={score}
+                  required
+                  onChange={(e) => setScore(e.target.value)}
+                />
+              </div>
+
+              {/* Point */}
+
+              <div>
+                <label className="label font-bold">Point</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="number"
+                  placeholder="Point"
+                  value={point}
+                  required
+                  onChange={(e) => setPoint(e.target.value)}
+                />
+              </div>
+
+              {/* Winstreak */}
+
+              <div>
+                <label className="label font-bold">Winstreak</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="number"
+                  placeholder="Winstreak"
+                  value={winstreak}
+                  required
+                  onChange={(e) => setWinstreak(e.target.value)}
+                />
+              </div>
+
+              {/* Guard */}
+
+              <div>
+                <label className="label font-bold">Guard</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="number"
+                  placeholder="Guard"
+                  value={guard}
+                  required
+                  onChange={(e) => setGuard(e.target.value)}
+                />
+              </div>
+
+              {/* Password*/}
+
+              <div>
+                <label className="label font-bold ">Password</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type={passwordVisible ? "text" : "password"}
+                  placeholder={passwordVisible ? "Password" : "********"}
+                  value={password}
+                  required
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              {/* Created At */}
+
+              <div>
+                <label className="label font-bold">Created At</label>
+                <input
+                  className="py-2 [width:300px] text-slate-500 font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="text"
+                  placeholder="Created At"
+                  value={formatTimestamp(createdAt)}
+                  required
+                  onChange={(e) => setCreatedAt(e.target.value)}
+                  disabled
+                />
+              </div>
+
               {/* Confirm Password*/}
 
               <div>
@@ -218,6 +375,20 @@ export default function editUser() {
                   value={confirmpassword}
                   required
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+
+              {/* Updated At */}
+
+              <div>
+                <label className="label font-bold">Updated At</label>
+                <input
+                  className="py-2 [width:300px] text-slate-500 font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="text"
+                  placeholder="Updated At"
+                  value={formatTimestamp(updatedAt)}
+                  onChange={(e) => setUpdatedAt(e.target.value)}
+                  disabled
                 />
               </div>
 

@@ -1,7 +1,6 @@
 import Navbar from "../components/NavbarLogin";
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AOS from "aos";
 import "aos/dist/aos.css";
@@ -20,17 +19,23 @@ export default function Register() {
     e.preventDefault();
     try {
       if (password === confirmpassword) {
-        await axios.post("http://localhost:5000/user", {
+        const response = await axios.post("http://localhost:5000/user", {
           name: name,
           age: age,
           email: email,
           password: password,
           confirmpassword: confirmpassword,
         });
-        let path = "/login";
-        navigate(path);
-        window.alert("Register Successfully");
-        history.push("/login");
+
+        if (response.data.success) {
+          // Registration successful, show success message
+          setMsg("Registration Successful");
+          let path = "/login";
+          navigate(path);
+        } else {
+          // Registration failed, show error message
+          setMsg(response.data.msg);
+        }
       } else {
         setMsg("Password do not match !");
       }
@@ -74,6 +79,14 @@ export default function Register() {
             </svg>
           </a>
         </div>
+        {msg && ( // Check if msg is not empty before rendering the message
+          <div className="toast toast-end">
+            <div className="alert alert-info">
+              <span>{msg}</span>
+            </div>
+          </div>
+        )}
+
         <h1
           data-aos="fade-down"
           data-aos-offset="200"

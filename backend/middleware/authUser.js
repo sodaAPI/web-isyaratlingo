@@ -15,6 +15,7 @@ export const verifyUser = async (req, res, next) => {
   req.email = user.email;
   req.roles = user.roles;
   req.userUUID = user.uuid;
+  req.point = user.point;
   next();
 };
 

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Pagination from "../../../components/Pagination";
 
 export default function listUsers() {
   const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     getUsers();
@@ -40,12 +41,35 @@ export default function listUsers() {
 
   return (
     <div className="flex flex-col mt-7">
+      <div className="flex flex-row pb-5">
+        <div className="bg-[#58CC02] p-3 rounded-l-xl">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="white"
+            class="w-6 h-6">
+            <path
+              fill-rule="evenodd"
+              d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <input
+          className="p-3 font-semibold px-3 rounded-r-xl round border bg-white border-[#B7B6B8]"
+          type="text"
+          placeholder="Search Users..."
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
+      </div>
       <div className=" overflow-x-auto">
-        <table className="table w-1/2 bg-[#007bff] rounded-lg text-white">
+        <table className="table w-11/12 bg-[#007bff] rounded-lg text-white">
           <thead className="text-white text-center">
             <tr>
               <th>ID</th>
               <th>Name</th>
+              <th>Photo</th>
               <th>Age</th>
               <th>Email</th>
               <th>Roles</th>
@@ -64,18 +88,18 @@ export default function listUsers() {
             {users
               .filter(
                 (user) =>
-                  user.id ||
-                  user.name ||
-                  user.age ||
-                  user.email ||
-                  user.roles ||
-                  user.score ||
-                  user.point ||
-                  user.progresslevel ||
-                  user.winstreak ||
-                  user.guard ||
-                  user.createdAt ||
-                  user.updatedAt
+                  new RegExp(searchTerm, "i").test(user.id) ||
+                  new RegExp(searchTerm, "i").test(user.name) ||
+                  new RegExp(searchTerm, "i").test(user.age) ||
+                  new RegExp(searchTerm, "i").test(user.email) ||
+                  new RegExp(searchTerm, "i").test(user.roles) ||
+                  new RegExp(searchTerm, "i").test(user.score) ||
+                  new RegExp(searchTerm, "i").test(user.point) ||
+                  new RegExp(searchTerm, "i").test(user.progresslevel) ||
+                  new RegExp(searchTerm, "i").test(user.winstreak) ||
+                  new RegExp(searchTerm, "i").test(user.guard) ||
+                  new RegExp(searchTerm, "i").test(user.createdAt) ||
+                  new RegExp(searchTerm, "i").test(user.updatedAt)
               )
               .slice(
                 (currentPage - 1) * itemsPerPage,
@@ -85,6 +109,15 @@ export default function listUsers() {
                 <tr key={user.id}>
                   <td>{user.id}</td>
                   <td>{user.name}</td>
+                  <td>
+                    {" "}
+                    {/* Display the image using the URL */}
+                    <img
+                      className="w-20"
+                      src={`http://localhost:5000/${user.image}`}
+                      alt={user.name}
+                    />
+                  </td>
                   <td>{user.age}</td>
                   <td>{user.email}</td>
                   <td>{user.roles}</td>

@@ -27,24 +27,6 @@ export const LoginUser = createAsyncThunk(
   }
 );
 
-export const LoginAdmin = createAsyncThunk(
-  "/login/admin",
-  async (user, thunkAPI) => {
-    try {
-      const response = await axios.post("http://localhost:5000/auth/loginadmin", {
-        email: user.email,
-        password: user.password,
-      });
-      return response.data;
-    } catch (error) {
-      if (error.response) {
-        const message = error.response.data.msg;
-        return thunkAPI.rejectWithValue(message);
-      }
-    }
-  }
-);
-
 export const getMe = createAsyncThunk("/me", async (_, thunkAPI) => {
   try {
     const response = await axios.get("http://localhost:5000/auth/me");

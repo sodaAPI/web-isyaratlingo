@@ -1,26 +1,52 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Listbox, Transition } from "@headlessui/react";
 import Sidebar from "../../../components/SidebarLearning";
 
-const categoryList = ["Family", "Foods", "Sports", "Animals"];
+const categoryList = [
+  "Keluarga",
+  "Abjad",
+  "Bilangan",
+  "Hari",
+  "Bulan",
+  "Warna",
+  "Hewan",
+  "Makanan",
+  "Kata Sifat",
+];
 
 export default function addDictionary() {
   const [name, setName] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(null); // Use null as initial state for image
   const [categories, setCategories] = useState(categoryList[0]);
   const navigate = useNavigate();
 
   const saveVocab = async (e) => {
     e.preventDefault();
-    await axios.post("http://localhost:5000/user", {
-      name: name,
-      image: image,
-      categories: categories,
-    });
-    let path = "/admin/dashboard/user";
-    navigate(path);
-    window.alert("User Added Successfully");
+
+    // Create a FormData object to send form data including the image
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("categories", categories);
+    if (image) {
+      formData.append("image", image);
+    }
+
+    try {
+      await axios.post(`http://localhost:5000/dictionary/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Set the correct content type
+        },
+      });
+
+      let path = "/admin/dashboard/dictionary";
+      navigate(path);
+      window.alert("Vocab Created Successfully");
+    } catch (error) {
+      console.error("Error Created Vocab:", error);
+      window.alert("Error Created Vocab.");
+    }
   };
 
   return (
@@ -28,7 +54,7 @@ export default function addDictionary() {
       <Sidebar />
       <div className="flex flex-col items-center  justify-center min-w-max mt-7">
         <div className="py-5">
-          <span className="text-xl font-bold">Add User</span>
+          <span className="text-xl font-bold">Add Vocab</span>
         </div>
         <form onSubmit={saveVocab}>
           <div>
@@ -53,11 +79,9 @@ export default function addDictionary() {
                 <label className="label  font-bold">Image</label>
                 <input
                   className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
-                  type="image"
-                  placeholder="Image"
-                  value={image}
-                  required
-                  onChange={(e) => setImage(e.target.value)}
+                  type="file"
+                  accept="image/*" // Accept only image files
+                  onChange={(e) => setImage(e.target.files[0])}
                 />
               </div>
 
@@ -72,7 +96,7 @@ export default function addDictionary() {
                   {({ open }) => (
                     <>
                       <Listbox.Label className="block font-bold text-start">
-                        Roles
+                        Categories
                       </Listbox.Label>
                       <div className="flex">
                         <span className="inline-block [width:300px]  rounded-md shadow-sm">
@@ -107,7 +131,9 @@ export default function addDictionary() {
                             static
                             className="max-h-60 rounded-md py-1 text-base leading-6 shadow-xs overflow-auto focus:outline-none sm:text-sm sm:leading-5">
                             {categoryList.map((categoryList) => (
-                              <Listbox.Option key={categoryList} value={categoryList}>
+                              <Listbox.Option
+                                key={categoryList}
+                                value={categoryList}>
                                 {({ selected, active }) => (
                                   <div
                                     className={`${
@@ -156,7 +182,7 @@ export default function addDictionary() {
               {/* Button */}
               <div className="col-span-2">
                 <button className="btn-register [width:300px] py-3 rounded-full font-bold normal-case text-lg text-white hover:text-green-100">
-                  Add User
+                  Add Vocab
                 </button>
               </div>
             </section>

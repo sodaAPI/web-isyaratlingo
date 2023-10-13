@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import pkg from "cors";
 import dotenv from "dotenv";
 import db from "./config/Database.js";
@@ -6,6 +7,14 @@ import session from "express-session";
 import SequelizeStore from "connect-session-sequelize";
 import bodyParser from "body-parser";
 import { Server } from "socket.io";
+import { fileURLToPath } from 'url';
+
+import Learn from "./models/learnModel.js";
+import Lesson from "./models/lessonModel.js";
+import Level from "./models/levelModel.js";
+import User from "./models/userModel.js";
+import Shop from "./models/shopModel.js";
+import Dictionary from "./models/dictionaryModel.js";
 
 import UserRoute from "./routes/UserRoute.js";
 import AuthRoute from "./routes/AuthRoute.js";
@@ -23,6 +32,9 @@ const store = new sessionStore({
   db: db,
   expiration: process.env.SESSION_EXPIRED * 60 * 60 * 1000,
 });
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(
   session({
@@ -56,6 +68,9 @@ app.use("/user", UserRoute);
 app.use("/shop", ShopRoute);
 app.use("/dictionary", DictonaryRoute);
 
+
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
 app.use(cors(corsOptions));
 
 // parse requests of content-type - application/json
@@ -83,8 +98,17 @@ io.on("connection", (socket) => {
   });
 });
 
-// Sync Database
-// (async () => {
-//   await db.sync();
-// })();
-// store.sync();
+(async () => {
+  try {
+    await db.sync(); // Sync other models
+    await Learn.sync();
+    await Lesson.sync();
+    await Level.sync();
+    await User.sync();
+    await Dictionary.sync();
+    await Shop.sync();
+    console.log('Models has been synchronized with the database...');
+  } catch (error) {
+    console.error('Error synchronizing models with the database:', error);
+  }
+})();

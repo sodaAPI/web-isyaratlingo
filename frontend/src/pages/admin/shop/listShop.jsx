@@ -7,6 +7,7 @@ export default function listShop() {
   const [items, setItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     getItems();
@@ -40,12 +41,35 @@ export default function listShop() {
 
   return (
     <div className="flex flex-col mt-7">
-      <table className="table w-1/2 bg-[#007bff] rounded-lg text-white">
+      <div className="flex flex-row pb-5">
+        <div className="bg-[#58CC02] p-3 rounded-l-xl">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="white"
+            class="w-6 h-6">
+            <path
+              fill-rule="evenodd"
+              d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <input
+          className="p-3 font-semibold px-3 rounded-r-xl round border bg-white border-[#B7B6B8]"
+          type="text"
+          placeholder="Search Items..."
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
+      </div>
+      <table className="table w-11/12 bg-[#007bff] rounded-lg text-white">
         <thead className="text-white text-center">
           <tr>
             <th>ID</th>
             <th>Name</th>
             <th>Price</th>
+            <th>Image</th>
             <th>Desciption</th>
             <th>Created At</th>
             <th>Update At</th>
@@ -57,12 +81,13 @@ export default function listShop() {
           {items
             .filter(
               (item) =>
-                item.id ||
-                item.name ||
-                item.price ||
-                item.description ||
-                item.createdAt ||
-                item.updatedAt
+                new RegExp(searchTerm, "i").test(item.id) ||
+                new RegExp(searchTerm, "i").test(item.name) ||
+                new RegExp(searchTerm, "i").test(item.price) ||
+                item.image ||
+                new RegExp(searchTerm, "i").test(item.description) ||
+                new RegExp(searchTerm, "i").test(item.createdAt) ||
+                new RegExp(searchTerm, "i").test(item.updatedAt)
             )
             .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
             .map((item) => (
@@ -70,12 +95,20 @@ export default function listShop() {
                 <td>{item.id}</td>
                 <td>{item.name}</td>
                 <td>{item.price}</td>
+                <td>
+                  {/* Display the image using the URL */}
+                  <img
+                  className="w-20"
+                  src={`http://localhost:5000/${item.image}`}
+                  alt={item.name}
+                />
+                </td>
                 <td>{item.description}</td>
                 <td>{formatTimestamp(item.createdAt)}</td>
                 <td>{formatTimestamp(item.updatedAt)}</td>
                 <td>
                   <Link
-                    to={`/admin/dashboard/user/edit/${item.uuid}`}
+                    to={`/admin/dashboard/shop/edit/${item.uuid}`}
                     className="flex flex-row gap-2 items-center justify-center bg-green-500 p-2 rounded-lg text-white">
                     Edit
                     <svg

@@ -82,7 +82,7 @@ export default function Shop() {
             </span>
           </div>
         </div>
-        <button
+        {/* <button
           onClick={addItem}
           className="btn-register flex flex-row gap-2 text-white font-bold rounded-full py-3 px-5">
           Add New Item{" "}
@@ -99,7 +99,7 @@ export default function Shop() {
               d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-        </button>
+        </button> */}
         <ListShop />
       </div>
     </div>

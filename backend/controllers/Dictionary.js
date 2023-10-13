@@ -1,4 +1,7 @@
 import Dictionary from "../models/dictionaryModel.js";
+import multer from "multer";
+
+import * as path from "path";
 
 export const getAllVocabs = async (req, res) => {
   try {
@@ -23,11 +26,11 @@ export const getVocabByUUID = async (req, res) => {
 };
 
 export const createVocab = async (req, res) => {
-  const { name, image, categories } = req.body;
+  const { name, categories } = req.body;
   try {
     await Dictionary.create({
       name: name,
-      image: image,
+      image: req.file.path,
       categories: categories,
     });
     res.status(201).json({ msg: "Item Created Successfully" });
@@ -43,13 +46,13 @@ export const updateVocab = async (req, res) => {
     },
   });
   if (!vocab) return res.status(404).json({ msg: "Item not found" });
-  const { name, image, categories } = req.body;
+  const { name, categories } = req.body;
   try {
     if (req.roles === "admin") {
       await Dictionary.update(
         {
           name: name,
-          image: image,
+          image: req.file.path,
           categories: categories,
         },
         {
@@ -77,6 +80,47 @@ export const updateVocab = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
+
+const formatTimestamp = (timestamp) => {
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Jakarta",
+  };
+  const formattedDateTime = new Intl.DateTimeFormat("en-US", options).format(
+    new Date(timestamp)
+  );
+  
+  // Replace slashes with hyphens and spaces with underscores
+  return formattedDateTime.replace(/\//g, '-').replace(/:/g, '_').replace(/,/g, '-');
+};
+
+export const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, `public/image/dictionary`);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname + " " + formatTimestamp(Date.now()) + path.extname(file.originalname));
+  },
+});
+
+export const upload = multer({
+  storage: storage,
+  limits: { fileSize: "2000000" }, //2MB
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|gif/;
+    const mimeType = fileTypes.test(file.mimetype);
+    const extname = fileTypes.test(path.extname(file.originalname));
+
+    if (mimeType && extname) {
+      return cb(null, true);
+    }
+    cb("Give proper files formate to upload");
+  },
+}).single("image");
 
 export const deleteVocab = async (req, res) => {
   const vocab = await Dictionary.findOne({

@@ -5,6 +5,8 @@ import {
   updateItem,
   deleteItem,
   getAllItems,
+  buyItem,
+  upload
 } from "../controllers/Shop.js";
 import {
   verifyUser,
@@ -23,8 +25,9 @@ const limiter = rateLimit({
 
 router.get("/", verifyUser, getAllItems);
 router.get("/:uuid", verifyUser, getItemByUUID);
-router.post("/", limiter, verifyUser, adminOnly, unauthorizedAccess, createItem);
-router.patch("/:uuid", verifyUser, adminOnly, unauthorizedAccess, updateItem);
+router.post("/", limiter, verifyUser, adminOnly, unauthorizedAccess, upload, createItem);
+router.post("/buy/:uuid", limiter, verifyUser, buyItem);
+router.patch("/:uuid", verifyUser, adminOnly, unauthorizedAccess, upload, updateItem);
 router.delete("/:uuid", verifyUser, adminOnly, unauthorizedAccess, deleteItem);
 
 export default router;

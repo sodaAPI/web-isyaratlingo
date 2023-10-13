@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Listbox, Transition } from "@headlessui/react";
 import Sidebar from "../../../components/SidebarLearning";
 
@@ -8,28 +8,52 @@ const rolesList = ["user", "admin"];
 
 export default function addUser() {
   const [name, setName] = useState("");
+  const [image, setImage] = useState(null); // Use null as initial state for image
   const [email, setEmail] = useState("");
   const [age, setAge] = useState("");
   const [roles, setRoles] = useState(rolesList[0]);
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
-  const history = useNavigate();
-  const { uuid } = useParams();
+  const [score, setScore] = useState("");
+  const [point, setPoint] = useState("");
+  const [progresslevel, setProgressLevel] = useState("");
+  const [winstreak, setWinstreak] = useState("");
+  const [guard, setGuard] = useState("");
   const navigate = useNavigate();
 
   const saveUser = async (e) => {
     e.preventDefault();
-    await axios.post("http://localhost:5000/user", {
-      name: name,
-      email: email,
-      age: age,
-      roles: roles,
-      password: password,
-       confirmpassword:  confirmpassword,
-    });
-    let path = "/admin/dashboard/user";
-    navigate(path);
-    window.alert("User Added Successfully");
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("email", email);
+    formData.append("age", age);
+    formData.append("roles", roles);
+    formData.append("password", password);
+    formData.append("confirmpassword", confirmpassword);
+    formData.append("score", score);
+    formData.append("point", point);
+    formData.append("progresslevel", progresslevel);
+    formData.append("winstreak", winstreak);
+    formData.append("guard", guard);
+    if (image) {
+      formData.append("image", image);
+    }
+
+    try {
+      await axios.post(`http://localhost:5000/user/create`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Set the correct content type
+        },
+      });
+
+      let path = "/admin/dashboard/user";
+      navigate(path);
+      window.alert("Profile Created Successfully");
+    } catch (error) {
+      console.error("Error Created Profile:", error);
+      window.alert("Error Created Profile.");
+    }
   };
 
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -50,11 +74,23 @@ export default function addUser() {
                 <label className="label font-bold">Name</label>
                 <input
                   className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
-                  type="name"
+                  type="text"
                   placeholder="Name"
                   value={name}
                   required
                   onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+
+              {/* Image */}
+
+              <div>
+                <label className="label  font-bold">Photo Profile</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="file"
+                  accept="image/*" // Accept only image files
+                  onChange={(e) => setImage(e.target.files[0])}
                 />
               </div>
 
@@ -164,6 +200,62 @@ export default function addUser() {
                 />
               </div>
 
+              {/* Age */}
+
+              <div>
+                <label className="label font-bold">Age</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="number"
+                  placeholder="Age"
+                  value={age}
+                  required
+                  onChange={(e) => setAge(e.target.value)}
+                />
+              </div>
+
+              {/* Score */}
+
+              <div>
+                <label className="label font-bold">Score</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="number"
+                  placeholder="Score"
+                  value={score}
+                  required
+                  onChange={(e) => setScore(e.target.value)}
+                />
+              </div>
+
+              {/* Point */}
+
+              <div>
+                <label className="label font-bold">Point</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="number"
+                  placeholder="Point"
+                  value={point}
+                  required
+                  onChange={(e) => setPoint(e.target.value)}
+                />
+              </div>
+
+              {/* Winstreak */}
+
+              <div>
+                <label className="label font-bold">Winstreak</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="number"
+                  placeholder="Winstreak"
+                  value={winstreak}
+                  required
+                  onChange={(e) => setWinstreak(e.target.value)}
+                />
+              </div>
+
               {/* Password*/}
 
               <div>
@@ -178,17 +270,17 @@ export default function addUser() {
                 />
               </div>
 
-              {/* Age */}
+              {/* Guard */}
 
               <div>
-                <label className="label font-bold">Age</label>
+                <label className="label font-bold">Guard</label>
                 <input
                   className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
                   type="number"
-                  placeholder="Age"
-                  value={age}
+                  placeholder="Guard"
+                  value={guard}
                   required
-                  onChange={(e) => setAge(e.target.value)}
+                  onChange={(e) => setGuard(e.target.value)}
                 />
               </div>
 

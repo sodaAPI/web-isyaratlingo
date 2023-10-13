@@ -19,6 +19,9 @@ const Shop = db.define(
     description: {
       type: DataTypes.STRING,
     },
+    image: {
+      type: DataTypes.STRING,
+    },
   },
   {
     freezeTableName: true,

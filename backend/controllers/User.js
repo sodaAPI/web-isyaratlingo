@@ -2,10 +2,24 @@ import User from "../models/userModel.js";
 import argon2 from "argon2";
 import nodemailer from "nodemailer";
 import randtoken from "rand-token";
+import multer from "multer";
+
+import * as path from "path";
 
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    res.json({ message: error.message });
+  }
+};
+
+export const getAllUserLeaderboard = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      attributes: ["id", "name", "score", "winstreak"],
+    });
     res.json(users);
   } catch (error) {
     res.json({ message: error.message });
@@ -25,8 +39,8 @@ export const getUserByUUID = async (req, res) => {
   }
 };
 
-export const createUser = async (req, res) => {
-  const { name, email, age, password, confirmpassword, roles } = req.body;
+export const registerUser = async (req, res) => {
+  const { name, email, age, password, confirmpassword } = req.body;
   if (password !== confirmpassword)
     return res.status(400).json({
       msg: "Password and Confirmation Password do not match, Please try again.",
@@ -37,10 +51,53 @@ export const createUser = async (req, res) => {
       name: name,
       email: email,
       age: age,
-      roles: roles,
       password: hashPassword,
     });
     res.status(201).json({ msg: "Register Successfully" });
+  } catch (error) {
+    res.status(400).json({ msg: error.message });
+  }
+};
+
+export const createUser = async (req, res) => {
+  const {
+    name,
+    email,
+    age,
+    password,
+    confirmpassword,
+    roles,
+    score,
+    point,
+    winstreak,
+    guard,
+  } = req.body;
+  
+  // Set a default image path if req.file.path is not provided
+  const imagePath = req.file ? req.file.path : "public/image/user/user-profile.png";
+
+  if (password !== confirmpassword) {
+    return res.status(400).json({
+      msg: "Password and Confirmation Password do not match, Please try again.",
+    });
+  }
+
+  const hashPassword = await argon2.hash(password);
+
+  try {
+    await User.create({
+      name: name,
+      email: email,
+      image: imagePath, // Use the imagePath variable here
+      age: age,
+      password: hashPassword,
+      roles: roles,
+      score: score,
+      point: point,
+      winstreak: winstreak,
+      guard: guard,
+    });
+    res.status(201).json({ msg: "User Created Successfully" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
@@ -152,7 +209,18 @@ export const updateUser = async (req, res) => {
     },
   });
   if (!user) return res.status(404).json({ msg: "User not found" });
-  const { name, email, age, password, confirmpassword, roles } = req.body;
+  const {
+    name,
+    email,
+    age,
+    password,
+    confirmpassword,
+    roles,
+    score,
+    point,
+    winstreak,
+    guard,
+  } = req.body;
   let hashPassword;
   if (password === "" || password === null) {
     hashPassword = user.password;
@@ -164,15 +232,26 @@ export const updateUser = async (req, res) => {
       msg: "Password and Confirmation Password do not match, Please try again.",
     });
   try {
+    const updateFields = {
+      name: name,
+      email: email,
+      age: age,
+      password: hashPassword,
+      roles: roles,
+      score: score,
+      point: point,
+      winstreak: winstreak,
+      guard: guard,
+    };
+
+    // Set the image field only if req.file is provided
+    if (req.file) {
+      updateFields.image = req.file.path;
+    }
+
     if (req.roles === "admin") {
       await User.update(
-        {
-          name: name,
-          email: email,
-          age: age,
-          password: hashPassword,
-          roles: roles,
-        },
+        updateFields,
         {
           where: {
             uuid: user.uuid,
@@ -181,12 +260,7 @@ export const updateUser = async (req, res) => {
       );
     } else {
       await User.update(
-        {
-          name: name,
-          email: email,
-          age: age,
-          password: hashPassword,
-        },
+        updateFields,
         {
           where: {
             uuid: user.uuid,
@@ -194,6 +268,72 @@ export const updateUser = async (req, res) => {
         }
       );
     }
+    res.status(200).json({ msg: "User Updated" });
+  } catch (error) {
+    res.status(400).json({ msg: error.message });
+  }
+};
+
+
+export const updateUserPassword = async (req, res) => {
+  const user = await User.findOne({
+    where: {
+      uuid: req.params.uuid,
+    },
+  });
+  if (!user) return res.status(404).json({ msg: "User not found" });
+  const { password, confirmpassword } = req.body;
+  let hashPassword;
+  if (password === "" || password === null) {
+    hashPassword = user.password;
+  } else {
+    hashPassword = await argon2.hash(password);
+  }
+  if (password !== confirmpassword)
+    return res.status(400).json({
+      msg: "Password and Confirmation Password do not match, Please try again.",
+    });
+  try {
+    await User.update(
+      {
+        password: hashPassword,
+      },
+      {
+        where: {
+          uuid: user.uuid,
+        },
+      }
+    );
+
+    res.status(200).json({ msg: "User Updated" });
+  } catch (error) {
+    res.status(400).json({ msg: error.message });
+  }
+};
+
+export const updateUserProfile = async (req, res) => {
+  const user = await User.findOne({
+    where: {
+      uuid: req.params.uuid,
+    },
+  });
+  if (!user) return res.status(404).json({ msg: "User not found" });
+  const { name, email, age } = req.body;
+  try {
+    await User.update(
+      {
+        name: name,
+        image: req.file.path,
+        email: email,
+        age: age,
+      },
+      {
+        where: {
+          uuid: user.uuid,
+        },
+      }
+    );
+
     res.status(200).json({ msg: "User Updated" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
@@ -218,3 +358,53 @@ export const deleteUser = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
+
+const formatTimestamp = (timestamp) => {
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Jakarta",
+  };
+  const formattedDateTime = new Intl.DateTimeFormat("en-US", options).format(
+    new Date(timestamp)
+  );
+
+  // Replace slashes with hyphens and spaces with underscores
+  return formattedDateTime
+    .replace(/\//g, "-")
+    .replace(/:/g, "_")
+    .replace(/,/g, "-");
+};
+
+export const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, `public/image/user`);
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      file.originalname +
+        " " +
+        formatTimestamp(Date.now()) +
+        path.extname(file.originalname)
+    );
+  },
+});
+
+export const upload = multer({
+  storage: storage,
+  limits: { fileSize: "2000000" }, //2MB
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|gif/;
+    const mimeType = fileTypes.test(file.mimetype);
+    const extname = fileTypes.test(path.extname(file.originalname));
+
+    if (mimeType && extname) {
+      return cb(null, true);
+    }
+    cb("Give proper files formate to upload");
+  },
+}).single("image");

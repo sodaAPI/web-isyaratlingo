@@ -19,6 +19,10 @@ const User = db.define(
     email: {
       type: DataTypes.STRING,
     },
+    image: {
+      type: DataTypes.STRING,
+      defaultValue: "public/image/user/user-profile.png",
+    },
     password: {
       type: DataTypes.STRING,
     },
@@ -39,7 +43,12 @@ const User = db.define(
     },
     progresslevel: {
       type: DataTypes.STRING,
-      defaultValue: "0",
+    },
+    progresslearn: {
+      type: DataTypes.STRING,
+    },
+    progresslesson: {
+      type: DataTypes.STRING,
     },
     winstreak: {
       type: DataTypes.STRING,

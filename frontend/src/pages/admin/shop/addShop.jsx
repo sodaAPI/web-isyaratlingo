@@ -6,17 +6,19 @@ import Sidebar from "../../../components/SidebarLearning";
 export default function addShop() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [image, setImage] = useState("");
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
 
   const saveItem = async (e) => {
     e.preventDefault();
-    await axios.post("http://localhost:5000/user", {
+    await axios.post("http://localhost:5000/shop", {
       name: name,
       price: price,
+      image: image,
       description: description,
     });
-    let path = "/admin/dashboard/user";
+    let path = "/admin/dashboard/shop";
     navigate(path);
     window.alert("User Added Successfully");
   };
@@ -27,7 +29,7 @@ export default function addShop() {
       <Sidebar />
       <div className="flex flex-col items-center  justify-center min-w-max mt-7">
         <div className="py-5">
-          <span className="text-xl font-bold">Add User</span>
+          <span className="text-xl font-bold">Add Item</span>
         </div>
         <form onSubmit={saveItem}>
           <div>
@@ -57,6 +59,20 @@ export default function addShop() {
                   value={price}
                   required
                   onChange={(e) => setPrice(e.target.value)}
+                />
+              </div>
+
+            {/* Image */}
+
+              <div>
+                <label className="label  font-bold">Image</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="file"
+                  placeholder="Image"
+                  value={image}
+                  required
+                  onChange={(e) => setImage(e.target.value)}
                 />
               </div>
 

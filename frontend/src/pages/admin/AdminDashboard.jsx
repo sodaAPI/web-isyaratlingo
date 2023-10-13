@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Sidebar from "../../components/SidebarLearning";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../../auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
-import ListUsers from "./users/listUsers";
-import Charts from "../../components/Charts";
 import Pagination from "../../components/Pagination";
+import ChartsUser from "../../components/ChartsUser";
 import axios from "axios";
 
 export default function AdminDashboard() {
@@ -109,6 +108,10 @@ export default function AdminDashboard() {
             </span>
             <span className="text-sm text-center">Registered admin</span>
           </div>
+        </div>
+
+        <div className="w-[650px]">
+          <ChartsUser />
         </div>
 
         <div className="py-3">

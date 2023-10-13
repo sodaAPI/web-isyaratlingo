@@ -30,7 +30,7 @@ export const Me = async (req, res) => {
     },
   });
   if (!user)
-    return res.status(404).json({ msg: "TEST 987 User not found, Please try again" });
+    return res.status(404).json({ msg: "User not found, Please try again" });
 
   res.status(200).json(user);
 };
