@@ -11,7 +11,7 @@ import {
   updateUserProfile,
   updateUserPassword,
   getAllUserLeaderboard,
-  upload
+  upload,
 } from "../controllers/User.js";
 import {
   verifyUser,
@@ -36,7 +36,7 @@ router.post("/", limiter, checkDuplicateUsernameOrEmail, registerUser);
 router.post("/create", adminOnly, upload, createUser);
 router.post("/forgotpassword", limiter, forgotPassword);
 router.patch("/resetpassword/:token", limiter, resetPassword);
-router.patch("/:uuid", verifyUser,upload, updateUser);
+router.patch("/:uuid", verifyUser, upload, updateUser);
 router.patch("/profile/:uuid", verifyUser, upload, updateUserProfile);
 router.patch("/password/:uuid", verifyUser, updateUserPassword);
 router.delete("/:uuid", verifyUser, adminOnly, unauthorizedAccess, deleteUser);

@@ -26,7 +26,7 @@ const limiter = rateLimit({
 router.get("/", verifyUser, getAllItems);
 router.get("/:uuid", verifyUser, getItemByUUID);
 router.post("/", limiter, verifyUser, adminOnly, unauthorizedAccess, upload, createItem);
-router.post("/buy/:uuid", limiter, verifyUser, buyItem);
+router.post("/buy/:uuid", verifyUser, buyItem);
 router.patch("/:uuid", verifyUser, adminOnly, unauthorizedAccess, upload, updateItem);
 router.delete("/:uuid", verifyUser, adminOnly, unauthorizedAccess, deleteItem);
 

@@ -1,3 +1,4 @@
+import Level from "./levelModel.js";
 import { Sequelize } from "sequelize";
 import db from "../config/database.js";
 
@@ -55,13 +56,15 @@ const User = db.define(
       defaultValue: "0",
     },
     guard: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
+      type: DataTypes.STRING,
+      defaultValue: "1",
     },
   },
   {
     freezeTableName: true,
   }
 );
-await User.sync();
+
+
+
 export default User;

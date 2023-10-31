@@ -28,20 +28,32 @@ export const getLearnByUUID = async (req, res) => {
 };
 
 export const createLearn = async (req, res) => {
-  const { name, level_uuid, image, description } = req.body;
+  const { name, level_uuid, number, description } = req.body;
   try {
+    // Check if a Learn with the same number and level_uuid already exists
+    const existingLearn = await Learn.findOne({
+      where: { number: number, level_uuid: level_uuid },
+    });
+
+    if (existingLearn) {
+      return res.status(400).json({ msg: "A Learn with the same number already exists for this level." });
+    }
+
+    // If no existing Learn with the same number and level_uuid, create a new one
     await Learn.create({
       name: name,
       level_uuid: level_uuid,
       image: req.file.path,
+      number: number,
       description: description,
-      right_answer: right_answer,
     });
-    res.status(201).json({ msg: "Level Created Successfully" });
+    res.status(201).json({ msg: "Learn Created Successfully" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
 };
+
+
 
 export const updateLearn = async (req, res) => {
   const learn = await Learn.findOne({
@@ -50,7 +62,7 @@ export const updateLearn = async (req, res) => {
     },
   });
   if (!learn) return res.status(404).json({ msg: "Level not found" });
-  const { name, level_uuid, image, description } = req.body;
+  const { name, level_uuid, number, description } = req.body;
   try {
     if (req.roles === "admin") {
       await Learn.update(
@@ -58,6 +70,7 @@ export const updateLearn = async (req, res) => {
           name: name,
           level_uuid: level_uuid,
           image: req.file.path,
+          number : number,
           description: description,
         },
         {
@@ -72,6 +85,7 @@ export const updateLearn = async (req, res) => {
           name: name,
           level_uuid: level_uuid,
           image: req.file.path,
+          number : number,
           description: description,
         },
         {
@@ -128,7 +142,7 @@ const formatTimestamp = (timestamp) => {
 
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, `public/image/user`);
+    cb(null, `public/image/learning`);
   },
   filename: (req, file, cb) => {
     cb(

@@ -97,7 +97,7 @@ export default function Shop() {
             />
           </svg>
         </button>
-        <ListDictionary/>
+        <ListDictionary />
       </div>
     </div>
   );

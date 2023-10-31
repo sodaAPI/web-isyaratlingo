@@ -6,7 +6,7 @@ import {
   updateLesson,
   deleteLesson,
   upload,
-} from "../controllers/Lesson";
+} from "../controllers/Lesson.js";
 import {
   verifyUser,
   adminOnly,

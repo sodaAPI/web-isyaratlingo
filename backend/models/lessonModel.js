@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import db from "../config/database.js";
+import Level from "./levelModel.js";
 
 const { DataTypes } = Sequelize;
 
@@ -15,8 +16,12 @@ const Lesson = db.define(
     },
     level_uuid: {
       type: DataTypes.STRING,
+      allowNull: false, // Ensure it's not null
     },
     image: {
+      type: DataTypes.STRING,
+    },
+    number: {
       type: DataTypes.STRING,
     },
     description: {
@@ -42,5 +47,5 @@ const Lesson = db.define(
     freezeTableName: true,
   }
 );
-await Lesson.sync();
+
 export default Lesson;

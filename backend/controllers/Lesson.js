@@ -31,7 +31,7 @@ export const createLesson = async (req, res) => {
   const {
     name,
     level_uuid,
-    image,
+    number,
     description,
     question_1,
     question_2,
@@ -40,10 +40,21 @@ export const createLesson = async (req, res) => {
     right_answer,
   } = req.body;
   try {
+    // Check if a Lesson with the same number and level_uuid already exists
+    const existingLesson = await Lesson.findOne({
+      where: { number: number, level_uuid: level_uuid },
+    });
+
+    if (existingLesson) {
+      return res.status(400).json({ msg: "A Lesson with the same number already exists for this level." });
+    }
+
+    // If no existing Lesson with the same number, create a new one
     await Lesson.create({
       name: name,
       level_uuid: level_uuid,
       image: req.file.path,
+      number: number,
       description: description,
       question_1: question_1,
       question_2: question_2,
@@ -51,11 +62,12 @@ export const createLesson = async (req, res) => {
       question_4: question_4,
       right_answer: right_answer,
     });
-    res.status(201).json({ msg: "Level Created Successfully" });
+    res.status(201).json({ msg: "Lesson Created Successfully" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
 };
+
 
 export const updateLesson = async (req, res) => {
   const lesson = await Lesson.findOne({
@@ -67,7 +79,7 @@ export const updateLesson = async (req, res) => {
   const {
     name,
     level_uuid,
-    image,
+    number,
     description,
     question_1,
     question_2,
@@ -82,6 +94,7 @@ export const updateLesson = async (req, res) => {
           name: name,
           level_uuid: level_uuid,
           image: req.file.path,
+          number: number,
           description: description,
           question_1: question_1,
           question_2: question_2,
@@ -101,6 +114,7 @@ export const updateLesson = async (req, res) => {
           name: name,
           level_uuid: level_uuid,
           image: req.file.path,
+          number : number,
           description: description,
           question_1: question_1,
           question_2: question_2,
@@ -162,7 +176,7 @@ const formatTimestamp = (timestamp) => {
 
 export const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, `public/image/user`);
+    cb(null, `public/image/lesson`);
   },
   filename: (req, file, cb) => {
     cb(

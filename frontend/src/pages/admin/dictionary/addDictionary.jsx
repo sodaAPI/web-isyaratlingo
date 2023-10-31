@@ -5,21 +5,23 @@ import { Listbox, Transition } from "@headlessui/react";
 import Sidebar from "../../../components/SidebarLearning";
 
 const categoryList = [
+  "Perkenalan",
   "Keluarga",
-  "Abjad",
-  "Bilangan",
+  "Kata Sifat",
+  "Buah",
+  "Hewan",
   "Hari",
   "Bulan",
   "Warna",
-  "Hewan",
-  "Makanan",
-  "Kata Sifat",
+  "Abjad",
+  "Bilangan",
 ];
 
 export default function addDictionary() {
   const [name, setName] = useState("");
   const [image, setImage] = useState(null); // Use null as initial state for image
   const [categories, setCategories] = useState(categoryList[0]);
+  const [src, setSRC] = useState("");
   const navigate = useNavigate();
 
   const saveVocab = async (e) => {
@@ -29,6 +31,7 @@ export default function addDictionary() {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("categories", categories);
+    formData.append("src", src);
     if (image) {
       formData.append("image", image);
     }
@@ -82,6 +85,20 @@ export default function addDictionary() {
                   type="file"
                   accept="image/*" // Accept only image files
                   onChange={(e) => setImage(e.target.files[0])}
+                />
+              </div>
+
+              {/* Source */}
+
+              <div>
+                <label className="label font-bold">Source</label>
+                <input
+                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
+                  type="text"
+                  placeholder="Source Link"
+                  value={src}
+                  required
+                  onChange={(e) => setSRC(e.target.value)}
                 />
               </div>
 

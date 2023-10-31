@@ -1,4 +1,7 @@
 import User from "../models/userModel.js";
+import Level from "../models/levelModel.js";
+import Learn from "../models/learnModel.js";
+import Lesson from "../models/lessonModel.js";
 import argon2 from "argon2";
 import nodemailer from "nodemailer";
 import randtoken from "rand-token";
@@ -8,7 +11,25 @@ import * as path from "path";
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({
+      include: [
+        {
+          model: Level, // Include the Level model
+          attributes: ["uuid", "level", "name"], // Specify the attributes you want to include
+          as: "levels", // This should match the alias you defined in the association
+        },
+        {
+          model: Learn, // Include the Learn model
+          attributes: ["number", "name", "level_uuid",], // Specify the attributes you want to include
+          as: "learns", // This should match the alias you defined in the association
+        },
+        {
+          model: Lesson, // Include the Lesson model
+          attributes: ["number", "name", "level_uuid", ], // Specify the attributes you want to include
+          as: "lessons", // This should match the alias you defined in the association
+        },
+      ],
+    });
     res.json(users);
   } catch (error) {
     res.json({ message: error.message });
@@ -41,18 +62,48 @@ export const getUserByUUID = async (req, res) => {
 
 export const registerUser = async (req, res) => {
   const { name, email, age, password, confirmpassword } = req.body;
-  if (password !== confirmpassword)
+
+  // Set a default image path if req.file.path is not provided
+  const imagePath = req.file ? req.file.path : "public/image/user/user-profile.png";
+  
+  if (password !== confirmpassword) {
     return res.status(400).json({
-      msg: "Password and Confirmation Password do not match, Please try again.",
+      msg: "Password and Confirmation Password do not match. Please try again.",
     });
+  }
+  
   const hashPassword = await argon2.hash(password);
+  
   try {
-    await User.create({
+    const user = await User.create({
       name: name,
       email: email,
+      image: imagePath, // Use the imagePath variable here
       age: age,
       password: hashPassword,
     });
+    
+    // Find the level with level = 1
+    const initialLevel = await Level.findOne({ where: { level: 1 } });
+    
+    // Find the initial learn with number = 1 and level_uuid = user's initial level
+    const initialLearn = await Learn.findOne({
+      where: { number: 1, level_uuid: initialLevel.uuid },
+    });
+    
+    // Find the initial lesson with number = 1 and level_uuid = user's initial level
+    const initialLesson = await Lesson.findOne({
+      where: { number: 1, level_uuid: initialLevel.uuid },
+    });
+    
+    // Update the user's progress
+    user.progresslevel = initialLevel.uuid;
+    user.progresslearn = initialLearn.uuid;
+    user.progresslesson = initialLesson.uuid;
+    
+    // Save the updated user
+    await user.save();
+
     res.status(201).json({ msg: "Register Successfully" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
@@ -72,7 +123,7 @@ export const createUser = async (req, res) => {
     winstreak,
     guard,
   } = req.body;
-  
+
   // Set a default image path if req.file.path is not provided
   const imagePath = req.file ? req.file.path : "public/image/user/user-profile.png";
 
@@ -85,7 +136,7 @@ export const createUser = async (req, res) => {
   const hashPassword = await argon2.hash(password);
 
   try {
-    await User.create({
+    const user = await User.create({
       name: name,
       email: email,
       image: imagePath, // Use the imagePath variable here
@@ -97,6 +148,28 @@ export const createUser = async (req, res) => {
       winstreak: winstreak,
       guard: guard,
     });
+
+    // Find the level with level = 1
+    const initialLevel = await Level.findOne({ where: { level: 1 } });
+
+    // Find the initial learn with number = 1 and level_uuid = user's initial level
+    const initialLearn = await Learn.findOne({
+      where: { number: 1, level_uuid: initialLevel.uuid },
+    });
+
+    // Find the initial lesson with number = 1 and level_uuid = user's initial level
+    const initialLesson = await Lesson.findOne({
+      where: { number: 1, level_uuid: initialLevel.uuid },
+    });
+
+    // Update the user's progress
+    user.progresslevel = initialLevel.uuid;
+    user.progresslearn = initialLearn.uuid;
+    user.progresslesson = initialLesson.uuid;
+
+    // Save the updated user
+    await user.save();
+
     res.status(201).json({ msg: "User Created Successfully" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
@@ -221,27 +294,32 @@ export const updateUser = async (req, res) => {
     winstreak,
     guard,
   } = req.body;
-  let hashPassword;
-  if (password === "" || password === null) {
-    hashPassword = user.password;
-  } else {
-    hashPassword = await argon2.hash(password);
+
+  // Initialize hashPassword with the existing user password
+  let hashPassword = user.password;
+
+  // Check if a new password is provided and hash it
+  if (password) {
+    if (password === confirmpassword) {
+      hashPassword = await argon2.hash(password);
+    } else {
+      return res.status(400).json({
+        msg: "Password and Confirmation Password do not match, Please try again.",
+      });
+    }
   }
-  if (password !== confirmpassword)
-    return res.status(400).json({
-      msg: "Password and Confirmation Password do not match, Please try again.",
-    });
+
   try {
     const updateFields = {
-      name: name,
-      email: email,
-      age: age,
-      password: hashPassword,
-      roles: roles,
-      score: score,
-      point: point,
-      winstreak: winstreak,
-      guard: guard,
+      name: name || user.name, // Use the existing name if not provided
+      email: email || user.email, // Use the existing email if not provided
+      age: age || user.age, // Use the existing age if not provided
+      password: hashPassword, // Use the hashed password
+      roles: roles || user.roles, // Use the existing roles if not provided
+      score: score || user.score, // Use the existing score if not provided
+      point: point || user.point, // Use the existing point if not provided
+      winstreak: winstreak || user.winstreak, // Use the existing winstreak if not provided
+      guard: guard || user.guard, // Use the existing guard if not provided
     };
 
     // Set the image field only if req.file is provided
@@ -273,6 +351,7 @@ export const updateUser = async (req, res) => {
     res.status(400).json({ msg: error.message });
   }
 };
+
 
 
 export const updateUserPassword = async (req, res) => {
@@ -318,21 +397,33 @@ export const updateUserProfile = async (req, res) => {
     },
   });
   if (!user) return res.status(404).json({ msg: "User not found" });
-  const { name, email, age } = req.body;
+
   try {
-    await User.update(
-      {
-        name: name,
-        image: req.file.path,
-        email: email,
-        age: age,
+    const { name, email, age } = req.body;
+
+    // Create an object to store the updated profile information
+    const updatedProfile = {};
+
+    // Check if the fields are provided in the request and update the user's profile accordingly
+    if (name) {
+      updatedProfile.name = name;
+    }
+    if (req.file && req.file.path) {
+      updatedProfile.image = req.file.path;
+    }
+    if (email) {
+      updatedProfile.email = email;
+    }
+    if (age) {
+      updatedProfile.age = age;
+    }
+
+    // Update the user's profile with the provided or existing values
+    await User.update(updatedProfile, {
+      where: {
+        uuid: user.uuid,
       },
-      {
-        where: {
-          uuid: user.uuid,
-        },
-      }
-    );
+    });
 
     res.status(200).json({ msg: "User Updated" });
   } catch (error) {

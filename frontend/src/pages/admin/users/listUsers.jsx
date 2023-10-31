@@ -76,7 +76,6 @@ export default function listUsers() {
               <th>Scores</th>
               <th>Point</th>
               <th>Progress Level</th>
-              <th>Winstreak</th>
               <th>Guard</th>
               <th>Created At</th>
               <th>Update At</th>
@@ -96,7 +95,6 @@ export default function listUsers() {
                   new RegExp(searchTerm, "i").test(user.score) ||
                   new RegExp(searchTerm, "i").test(user.point) ||
                   new RegExp(searchTerm, "i").test(user.progresslevel) ||
-                  new RegExp(searchTerm, "i").test(user.winstreak) ||
                   new RegExp(searchTerm, "i").test(user.guard) ||
                   new RegExp(searchTerm, "i").test(user.createdAt) ||
                   new RegExp(searchTerm, "i").test(user.updatedAt)
@@ -124,8 +122,7 @@ export default function listUsers() {
                   <td>{user.score}</td>
                   <td>{user.point}</td>
                   <td>{user.progresslevel}</td>
-                  <td>{user.winstreak}</td>
-                  <td>{user.guard}</td>
+                  <td>{user.guard - 1}</td>
                   <td>{formatTimestamp(user.createdAt)}</td>
                   <td>{formatTimestamp(user.updatedAt)}</td>
                   <td>

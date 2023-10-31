@@ -6,7 +6,7 @@ createLearn,
 updateLearn, 
 deleteLearn,
 upload,
-} from "../controllers/Learn";
+} from "../controllers/Learn.js";
 import {
   verifyUser,
   adminOnly,

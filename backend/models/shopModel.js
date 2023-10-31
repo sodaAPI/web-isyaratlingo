@@ -27,5 +27,5 @@ const Shop = db.define(
     freezeTableName: true,
   }
 );
-await Shop.sync();
+
 export default Shop;

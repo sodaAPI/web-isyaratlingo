@@ -12,7 +12,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [msg, setMsg] = useState("");
-  const history = useNavigate();
   const navigate = useNavigate();
 
   const Register = async (e) => {
@@ -26,18 +25,18 @@ export default function Register() {
           password: password,
           confirmpassword: confirmpassword,
         });
-
+        setMsg("Registration Successful");
+        setTimeout(() => {
+          navigate("/login");
+        }, 1000); // Delay navigation to /login for 5 seconds
         if (response.data.success) {
           // Registration successful, show success message
-          setMsg("Registration Successful");
-          let path = "/login";
-          navigate(path);
         } else {
           // Registration failed, show error message
           setMsg(response.data.msg);
         }
       } else {
-        setMsg("Password do not match !");
+        setMsg("Passwords do not match!");
       }
     } catch (error) {
       if (error.response) {

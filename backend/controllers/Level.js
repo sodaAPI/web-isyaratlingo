@@ -3,12 +3,19 @@ import Lesson from "../models/lessonModel.js";
 import Learn from "../models/learnModel.js";
 import User from "../models/userModel.js";
 
-export const getUserLevel = async (req, res) => {
-  const userId = req.user.uuid; // Assuming you have a middleware that attaches the user object to req
+Lesson.belongsTo(Level, { foreignKey: "level_uuid" });
+Learn.belongsTo(Level, { foreignKey: "level_uuid" });
+
+Level.hasMany(Learn, { foreignKey: "level_uuid" });
+Level.hasMany(Lesson, { foreignKey: "level_uuid" });
+
+export const getNextLearnSession = async (req, res) => {
+  const userUUID = req.userUUID;
+
   try {
     const user = await User.findOne({
       where: {
-        uuid: userId,
+        uuid: userUUID,
       },
     });
 
@@ -16,92 +23,77 @@ export const getUserLevel = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if user's progresslevel is not null
-    if (user.progresslevel !== null) {
-      // User has a progresslevel, retrieve the user's level based on progresslevel
-      const userLevel = await Level.findOne({
-        where: {
-          uuid: user.progresslevel,
-        },
-      });
+    if (!user.progresslevel) {
+      return res.status(400).json({ message: "User's progress level not set" });
+    }
 
-      if (!userLevel) {
-        return res.status(404).json({ message: "User's Level not found" });
-      }
+    const userLevel = await Level.findOne({
+      where: {
+        uuid: user.progresslevel,
+      },
+    });
 
-      // Retrieve the associated levels for Learn.level_uuid and Lesson.level_uuid
-      const learnLevel = await Level.findOne({
-        where: {
-          uuid: userLevel.level_uuid_learn,
-        },
-      });
+    if (!userLevel) {
+      return res.status(404).json({ message: "User's Level not found" });
+    }
 
-      const lessonLevel = await Level.findOne({
-        where: {
-          uuid: userLevel.level_uuid_lesson,
-        },
-      });
+    if (!user.progresslearn) {
+      return res.status(400).json({ message: "User's progress learn not set" });
+    }
 
-      res.json({
-        userLevel: userLevel,
-        learnLevel: learnLevel,
-        lessonLevel: lessonLevel,
-      });
-    } else {
-      // User's progresslevel is null, set it to a default level (e.g., Level 1)
-      const defaultLevel = await Level.findOne({
-        where: {
-          level: 1, // Set to the desired default level number
-        },
-      });
+    const currentLearn = await Learn.findOne({
+      where: {
+        uuid: user.progresslearn,
+      },
+    });
 
-      if (!defaultLevel) {
-        return res.status(404).json({ message: "Default Level not found" });
-      }
+    if (!currentLearn) {
+      return res
+        .status(404)
+        .json({ message: "User's current Learn session not found" });
+    }
 
-      // Update the user's progresslevel to the default level
-      await User.update(
-        {
-          progresslevel: defaultLevel.uuid,
-        },
-        {
-          where: {
-            uuid: userId,
-          },
-        }
-      );
+    // Convert currentLearn.number to a number
+    const currentNumber = parseInt(currentLearn.number, 10);
 
-      // Retrieve the associated levels for Learn.level_uuid and Lesson.level_uuid
-      const learnLevel = await Level.findOne({
-        where: {
-          uuid: defaultLevel.level_uuid_learn,
-        },
-      });
+    const nextLearnSession = await Learn.findOne({
+      where: {
+        level_uuid: userLevel.uuid,
+        number: currentNumber + 1,
+      },
+    });
 
-      const lessonLevel = await Level.findOne({
-        where: {
-          uuid: defaultLevel.level_uuid_lesson,
-        },
-      });
-
-      res.json({
-        userLevel: defaultLevel,
-        learnLevel: learnLevel,
-        lessonLevel: lessonLevel,
+    if (!nextLearnSession) {
+      return res.json({
+        message: "No more sessions found for the current level.",
       });
     }
+
+    // Update the user's progress learn to the next session
+    await User.update(
+      {
+        progresslearn: nextLearnSession.uuid,
+      },
+      {
+        where: {
+          uuid: userUUID,
+        },
+      }
+    );
+
+    res.json({ message: "Next learn session retrieved.", nextLearnSession });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-export const getUserLearn = async (req, res) => {
-  const userId = req.user.uuid; // Assuming you have a middleware that attaches the user object to req
+export const getNextLessonSession = async (req, res) => {
+  const userUUID = req.userUUID;
 
   try {
     const user = await User.findOne({
       where: {
-        uuid: userId,
+        uuid: userUUID,
       },
     });
 
@@ -109,148 +101,189 @@ export const getUserLearn = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Check if user's progresslearn is not null
-    if (user.progresslearn !== null) {
-      // User has progresslearn, retrieve the user's learn progress based on progresslearn
-      const learnProgress = await Learn.findOne({
-        where: {
-          uuid: user.progresslearn,
-        },
-      });
-
-      if (!learnProgress) {
-        return res.status(404).json({ message: "Learn progress not found" });
-      }
-
-      res.json({ userLearn: learnProgress });
-    } else {
-      // User's progresslearn is null, set it to a default Learn level (e.g., Learn level with Level 1)
-      const defaultLevel = await Level.findOne({
-        where: {
-          level: 1, // Set to the desired default level number
-        },
-      });
-
-      if (!defaultLevel) {
-        return res.status(404).json({ message: "Default Learn Level not found" });
-      }
-
-      // Create a new learn progress entry for the default level
-      const defaultLearnProgress = await Learn.create({
-        level_uuid: defaultLevel.uuid,
-        // You can set other properties here as needed
-      });
-
-      // Update the user's progresslearn to the default learn progress entry
-      await User.update(
-        {
-          progresslearn: defaultLearnProgress.uuid,
-        },
-        {
-          where: {
-            uuid: userId,
-          },
-        }
-      );
-
-      res.json({ userLearn: defaultLearnProgress });
+    if (!user.progresslevel) {
+      return res.status(400).json({ message: "User's progress level not set" });
     }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
-export const getUserLesson = async (req, res) => {
-  const userId = req.user.uuid; // Assuming you have a middleware that attaches the user object to req
-
-  try {
-    const user = await User.findOne({
+    const userLevel = await Level.findOne({
       where: {
-        uuid: userId,
+        uuid: user.progresslevel,
       },
     });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!userLevel) {
+      return res.status(404).json({ message: "User's Level not found" });
     }
 
-    // Check if user's progresslesson is not null
-    if (user.progresslesson !== null) {
-      // User has progresslesson, retrieve the user's lesson progress based on progresslesson
-      const lessonProgress = await Lesson.findOne({
+    if (!user.progresslearn) {
+      return res.status(400).json({ message: "User's progress learn not set" });
+    }
+
+    const currentLesson = await Lesson.findOne({
+      where: {
+        uuid: user.progresslesson,
+      },
+    });
+
+    if (!currentLesson) {
+      return res
+        .status(404)
+        .json({ message: "User's current Lesson session not found" });
+    }
+
+    // Convert currentLesson.number to a number
+    const currentNumber = parseInt(currentLesson.number, 10);
+
+    const nextLessonSession = await Lesson.findOne({
+      where: {
+        level_uuid: userLevel.uuid,
+        number: currentNumber + 1,
+      },
+    });
+
+    const currentLevel = parseInt(userLevel.level, 10);
+
+    if (!nextLessonSession) {
+      const nextLevel = await Level.findOne({
         where: {
-          uuid: user.progresslesson,
+          level: currentLevel + 1,
         },
       });
 
-      if (!lessonProgress) {
-        return res.status(404).json({ message: "Lesson progress not found" });
+      if (!nextLevel) {
+        return res.json({
+          message: "No more sessions found for the current level.",
+        });
       }
 
-      res.json({ userLesson: lessonProgress });
-    } else {
-      // User's progresslesson is null, set it to a default Lesson level (e.g., Lesson level with Level 1)
-      const defaultLevel = await Level.findOne({
-        where: {
-          level: 1, // Set to the desired default level number
-        },
-      });
-
-      if (!defaultLevel) {
-        return res.status(404).json({ message: "Default Lesson Level not found" });
-      }
-
-      // Create a new lesson progress entry for the default level
-      const defaultLessonProgress = await Lesson.create({
-        level_uuid: defaultLevel.uuid,
-        // You can set other properties here as needed
-      });
-
-      // Update the user's progresslesson to the default lesson progress entry
+      // Update the user's progress level to the next level
       await User.update(
         {
-          progresslesson: defaultLessonProgress.uuid,
+          progresslevel: nextLevel.uuid,
         },
         {
           where: {
-            uuid: userId,
+            uuid: userUUID,
           },
         }
       );
 
-      res.json({ userLesson: defaultLessonProgress });
+      // Get the next learn session associated with the next level
+      const nextLearnSession = await Learn.findOne({
+        where: {
+          level_uuid: nextLevel.uuid,
+        },
+      });
+
+      if (!nextLearnSession) {
+        return res.json({
+          message: "No more learn sessions found for the next level.",
+        });
+      }
+
+      // Update the user's progress learn to the next learn session
+      await User.update(
+        {
+          progresslearn: nextLearnSession.uuid,
+        },
+        {
+          where: {
+            uuid: userUUID,
+          },
+        }
+      );
+
+      // Get the next lesson session associated with the next level
+      const nextLessonSession = await Lesson.findOne({
+        where: {
+          level_uuid: nextLevel.uuid,
+        },
+      });
+
+      if (!nextLessonSession) {
+        return res.json({
+          message: "No more lesson sessions found for the next level.",
+        });
+      }
+
+      // Update the user's progress lesson to the next lesson session
+      await User.update(
+        {
+          progresslesson: nextLessonSession.uuid,
+        },
+        {
+          where: {
+            uuid: userUUID,
+          },
+        }
+      );
+
+      return res.json({
+        message: "User level, learn and lesson updated to the next level",
+      });
     }
+
+    // Update the user's progress learn to the next session
+    await User.update(
+      {
+        progresslesson: nextLessonSession.uuid,
+      },
+      {
+        where: {
+          uuid: userUUID,
+        },
+      }
+    );
+
+    res.json({ message: "Next lesson session retrieved.", nextLessonSession });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 export const getAllLevels = async (req, res) => {
   try {
-    // Perform a JOIN operation between Learn and Lesson tables using the Level table as a reference
     const levels = await Level.findAll({
       include: [
         {
-          model: Learn,
-          required: true,
-          where: {
-            level_uuid: Level.col("uuid"), // Match Learn.level_uuid with Level.uuid
-          },
+          model: Learn, // Include the Learn model
+          attributes: [
+            "uuid",
+            "number",
+            "name",
+            "level_uuid",
+            "image",
+            "description",
+          ],
+          as: "learns",
         },
         {
-          model: Lesson,
-          required: true,
-          where: {
-            level_uuid: Level.col("uuid"), // Match Lesson.level_uuid with Level.uuid
-          },
+          model: Lesson, // Include the Lesson model
+          attributes: [
+            "uuid",
+            "number",
+            "name",
+            "level_uuid",
+            "image",
+            "description",
+            "question_1",
+            "question_2",
+            "question_3",
+            "question_4",
+            "right_answer",
+          ],
+          as: "lessons",
         },
       ],
     });
 
-    res.json(levels);
+    if (levels) {
+      res.json(levels);
+    } else {
+      res.status(404).json({ message: "No levels found." });
+    }
   } catch (error) {
-    res.json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 

@@ -234,7 +234,7 @@ export default function NavbarLearning() {
 
   return (
     <div>
-      {/* Bottom Nav */}
+      {/* Bottom Nav
       <div className="lg:hidden">
         <div className="btm-nav">
           <ul className="flex flex-row gap-5 md:gap-12 bg-slate-50 mb-5">
@@ -267,7 +267,7 @@ export default function NavbarLearning() {
             ))}
           </ul>
         </div>
-      </div>
+      </div> */}
 
       {/* Sidebar */}
       <div className="">

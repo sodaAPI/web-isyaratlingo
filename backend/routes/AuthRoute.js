@@ -3,7 +3,6 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import {
   verifyUser,
-  adminOnly,
   unauthorizedAccess,
 } from "../middleware/AuthUser.js";
 
@@ -16,8 +15,7 @@ const loginLimiter = rateLimit({
 });
 
 router.get("/me", Me);
-router.post("/login", loginLimiter, Login);
-router.post("/loginadmin", loginLimiter, adminOnly);
+router.post("/login", Login);
 router.delete("/logout", verifyUser, logOut);
 
 export default router;

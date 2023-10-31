@@ -5,7 +5,9 @@ import {
   createLevel,
   updateLevel,
   deleteLevel,
-} from "../controllers/Level";
+  getNextLearnSession,
+  getNextLessonSession
+} from "../controllers/Level.js";
 import {
   verifyUser,
   adminOnly,
@@ -17,6 +19,8 @@ const router = express.Router();
 router.get("/", verifyUser, getAllLevels);
 router.get("/:uuid", verifyUser, getLevelByUUID);
 router.post("/", verifyUser, adminOnly, unauthorizedAccess, createLevel);
+router.post("/nextlearn/:uuid", verifyUser, getNextLearnSession);
+router.post("/nextlesson/:uuid", verifyUser, getNextLessonSession);
 router.patch("/:uuid", verifyUser, adminOnly, unauthorizedAccess, updateLevel);
 router.delete("/:uuid", verifyUser, adminOnly, unauthorizedAccess, deleteLevel);
 

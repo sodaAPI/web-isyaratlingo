@@ -35,7 +35,18 @@ export const buyItem = async (req, res) => {
   if (!shop) return res.status(404).json({ msg: "Item not found" });
 
   try {
-    if (req.point >= shop.price) {
+    const user = await User.findOne({
+      where: {
+        uuid: req.userUUID,
+      },
+    });
+
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const userPoints = parseInt(user.point, 10);
+    const shopPrice = parseInt(shop.price, 10);
+
+    if (userPoints >= shopPrice) {
       // Increment the 'guard' field by 1
       await User.increment("guard", {
         by: 1,
@@ -47,7 +58,7 @@ export const buyItem = async (req, res) => {
       // Deduct the price from the user's points
       await User.update(
         {
-          point: req.point - shop.price,
+          point: userPoints - shopPrice,
         },
         {
           where: {
@@ -88,14 +99,38 @@ export const updateItem = async (req, res) => {
   });
   if (!shop) return res.status(404).json({ msg: "Item not found" });
   const { name, price, description } = req.body;
+
+  // Define an object to store the updated fields
+  const updateFields = {};
+
+  // Check if a new value is provided for each field and update it if not empty
+  if (name !== undefined) {
+    updateFields.name = name;
+  } else {
+    updateFields.name = shop.name; // Use the existing name
+  }
+
+  if (price !== undefined) {
+    updateFields.price = price;
+  } else {
+    updateFields.price = shop.price; // Use the existing price
+  }
+
+  if (description !== undefined) {
+    updateFields.description = description;
+  } else {
+    updateFields.description = shop.description; // Use the existing description
+  }
+
   try {
+    if (req.file) {
+      updateFields.image = req.file.path; // Set the image field only if req.file is provided
+    } else {
+      updateFields.image = shop.image; // Use the existing image
+    }
+
     await Shop.update(
-      {
-        name: name,
-        price: price,
-        description: description,
-        image: req.file.path, 
-      },
+      updateFields, // Use the defined updateFields object
       {
         where: {
           uuid: shop.uuid,
@@ -121,9 +156,12 @@ const formatTimestamp = (timestamp) => {
   const formattedDateTime = new Intl.DateTimeFormat("en-US", options).format(
     new Date(timestamp)
   );
-  
+
   // Replace slashes with hyphens and spaces with underscores
-  return formattedDateTime.replace(/\//g, '-').replace(/:/g, '_').replace(/,/g, '-');
+  return formattedDateTime
+    .replace(/\//g, "-")
+    .replace(/:/g, "_")
+    .replace(/,/g, "-");
 };
 
 export const storage = multer.diskStorage({
@@ -131,7 +169,13 @@ export const storage = multer.diskStorage({
     cb(null, `public/image/shop`);
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname + " " + formatTimestamp(Date.now()) + path.extname(file.originalname));
+    cb(
+      null,
+      file.originalname +
+        " " +
+        formatTimestamp(Date.now()) +
+        path.extname(file.originalname)
+    );
   },
 });
 

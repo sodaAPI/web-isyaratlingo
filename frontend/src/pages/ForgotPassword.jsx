@@ -74,7 +74,7 @@ export default function ForgotPassword() {
           data-aos-delay="50"
           data-aos-duration="1000"
           className="text-black font-bold text-3xl py-10">
-          Reset Password
+          Forgot Password
         </h1>
         <div
           data-aos="zoom-in"

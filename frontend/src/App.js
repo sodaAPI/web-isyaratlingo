@@ -11,6 +11,8 @@ import PageNotFound from "./pages/PageNotFound";
 import Learning from "./pages/learning/LearningHome";
 import LearningInstruction from "./pages/learning/LearningInstruction";
 import LearningPage from "./pages/learning/LearningPage";
+import MigrateLearn from "./pages/learning/MigrateLearn"
+import MigrateLesson from "./pages/learning/MigrateLesson"
 
 import Leaderboard from "./pages/learning/Leaderboard";
 import Profile from "./pages/learning/Profile";
@@ -31,6 +33,9 @@ import AddDictionary from "./pages/admin/dictionary/addDictionary";
 import EditShop from "./pages/admin/shop/editShop";
 import AddShop from "./pages/admin/shop/addShop";
 import ResetPassword from "./pages/ResetPassword";
+
+import LearningTemp from "./pages/learning/LearningTemp";
+import LessonTemp from "./pages/learning/LessonTemp";
 
 function App() {
   return (
@@ -53,8 +58,13 @@ function App() {
 
           {/* Learning */}
           <Route path="/learning" element={<Learning />} />
-          <Route path="/learn-instruction" element={<LearningInstruction />} />
-          <Route path="/learn-task" element={<LearningPage />} />
+          <Route path="/learn-instruction/:uuid" element={<LearningInstruction />} />
+          <Route path="/learn-task/:uuid" element={<LearningPage />} />
+          <Route path="/migrate-learn" element={<MigrateLearn />} />
+          <Route path="/migrate-lesson" element={<MigrateLesson />} />
+
+          <Route path="/templesson" element={<LessonTemp />} />
+          <Route path="/templearn" element={<LearningTemp />} />
 
 
           <Route path="/leaderboard" element={<Leaderboard />} />

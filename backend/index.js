@@ -6,8 +6,7 @@ import db from "./config/Database.js";
 import session from "express-session";
 import SequelizeStore from "connect-session-sequelize";
 import bodyParser from "body-parser";
-import { Server } from "socket.io";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 
 import Learn from "./models/learnModel.js";
 import Lesson from "./models/lessonModel.js";
@@ -19,7 +18,10 @@ import Dictionary from "./models/dictionaryModel.js";
 import UserRoute from "./routes/UserRoute.js";
 import AuthRoute from "./routes/AuthRoute.js";
 import ShopRoute from "./routes/ShopRoute.js";
-import DictonaryRoute from "./routes/DictionaryRoute.js"
+import DictonaryRoute from "./routes/DictionaryRoute.js";
+import LevelRoute from "./routes/LevelRoute.js";
+import LearnRoute from "./routes/LearnRoute.js";
+import LessonRoute from "./routes/LessonRoute.js";
 
 dotenv.config();
 
@@ -67,9 +69,11 @@ app.use("/auth", AuthRoute);
 app.use("/user", UserRoute);
 app.use("/shop", ShopRoute);
 app.use("/dictionary", DictonaryRoute);
+app.use("/level", LevelRoute);
+app.use("/learn", LearnRoute);
+app.use("/lesson", LessonRoute);
 
-
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 app.use(cors(corsOptions));
 
@@ -78,25 +82,6 @@ app.use(bodyParser.json());
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// Socket.io
-const server = app.listen(process.env.APP_PORT, () =>
-  console.log(`Server started on PORT ${process.env.APP_PORT}`)
-);
-
-const io = new Server(server, {
-  cors: {
-    origin: process.env.URL_ORIGIN,
-    credentials: true,
-  },
-});
-
-io.on("connection", (socket) => {
-  console.log(`User connected ${socket.id}`);
-  socket.on("disconnect", () => {
-    console.log(`User disconnected ${socket.id}`);
-  });
-});
 
 (async () => {
   try {
@@ -107,8 +92,13 @@ io.on("connection", (socket) => {
     await User.sync();
     await Dictionary.sync();
     await Shop.sync();
-    console.log('Models has been synchronized with the database...');
+    console.log("Models have been synchronized with the database...");
   } catch (error) {
-    console.error('Error synchronizing models with the database:', error);
+    console.error("Error synchronizing models with the database:", error);
   }
 })();
+
+// Start the server
+app.listen(process.env.APP_PORT || 3000, () =>
+  console.log(`Server started on PORT ${process.env.APP_PORT}`)
+);

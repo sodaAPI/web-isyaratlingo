@@ -17,7 +17,6 @@ export default function addUser() {
   const [score, setScore] = useState("");
   const [point, setPoint] = useState("");
   const [progresslevel, setProgressLevel] = useState("");
-  const [winstreak, setWinstreak] = useState("");
   const [guard, setGuard] = useState("");
   const navigate = useNavigate();
 
@@ -34,7 +33,6 @@ export default function addUser() {
     formData.append("score", score);
     formData.append("point", point);
     formData.append("progresslevel", progresslevel);
-    formData.append("winstreak", winstreak);
     formData.append("guard", guard);
     if (image) {
       formData.append("image", image);
@@ -239,20 +237,6 @@ export default function addUser() {
                   value={point}
                   required
                   onChange={(e) => setPoint(e.target.value)}
-                />
-              </div>
-
-              {/* Winstreak */}
-
-              <div>
-                <label className="label font-bold">Winstreak</label>
-                <input
-                  className="py-2 [width:300px] font-semibold px-3 rounded-lg border bg-white border-[#B7B6B8]"
-                  type="number"
-                  placeholder="Winstreak"
-                  value={winstreak}
-                  required
-                  onChange={(e) => setWinstreak(e.target.value)}
                 />
               </div>
 

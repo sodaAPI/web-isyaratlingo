@@ -78,7 +78,7 @@ export default function Shop() {
                     </div>
                   </div>
 
-                  <div
+                  <button
                     onClick={() => buyItem(item.uuid)}
                     className="flex flex-row my-5 gap-2 btn-register text-white font-semibold text-lg items-center justify-center text-center rounded-2xl h-[50px] w-[150px]">
                     <svg
@@ -93,7 +93,7 @@ export default function Shop() {
                       />
                     </svg>{" "}
                     {item.price} Points
-                  </div>
+                  </button>
                 </div>
               </li>
             ))}

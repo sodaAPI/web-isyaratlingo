@@ -57,7 +57,8 @@ export default function Profile() {
           <div className="flex items-center justify-center">
             <img
               src={`http://localhost:5000/${user && user.image}`}
-              className=" rounded-full w-[200px] h-[200px]"/>
+              className=" rounded-full w-[200px] h-[200px]"
+            />
           </div>
 
           {/* Profile Detail */}

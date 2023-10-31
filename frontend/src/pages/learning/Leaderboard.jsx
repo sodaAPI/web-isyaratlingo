@@ -8,11 +8,11 @@ export default function Leaderboard() {
   const [users, setUsers] = useState([]);
   const [scoreCurrentPage, setScoreCurrentPage] = useState(1);
   const [scoreItemsPerPage] = useState(10);
-  const [winstreakCurrentPage, setWinstreakCurrentPage] = useState(1);
-  const [winstreakItemsPerPage] = useState(10);
 
   const getUsers = async () => {
-    const response = await axios.get(`http://localhost:5000/user/all-leaderboard`);
+    const response = await axios.get(
+      `http://localhost:5000/user/all-leaderboard`
+    );
     setUsers(response.data);
   };
 
@@ -24,24 +24,12 @@ export default function Leaderboard() {
     setScoreCurrentPage(page);
   };
 
-  const winstreakHandlePageChange = (page) => {
-    setWinstreakCurrentPage(page);
-  };
-
   const scoreUsers = users
     .filter((user) => user.id || user.name || user.score)
     .sort((a, b) => b.score - a.score)
     .slice(
       (scoreCurrentPage - 1) * scoreItemsPerPage,
       scoreCurrentPage * scoreItemsPerPage
-    );
-
-  const winstreakUsers = users
-    .filter((user) => user.id || user.name || user.winstreak)
-    .sort((a, b) => b.winstreak - a.winstreak)
-    .slice(
-      (winstreakCurrentPage - 1) * winstreakItemsPerPage,
-      winstreakCurrentPage * winstreakItemsPerPage
     );
 
   return (
@@ -107,48 +95,6 @@ export default function Leaderboard() {
             itemsPerPage={scoreItemsPerPage}
             totalItems={users.length}
             handlePageChange={scoreHandlePageChange}
-          />
-
-          {/* Wistreak Leaderboard */}
-
-          <h1 className="flex flex-row items-center gap-2 text-2xl font-bold text-[#c73232] w-[350px] underline-title my-5">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-              class="w-8 h-8">
-              <path
-                fill-rule="evenodd"
-                d="M12.963 2.286a.75.75 0 00-1.071-.136 9.742 9.742 0 00-3.539 6.177A7.547 7.547 0 016.648 6.61a.75.75 0 00-1.152-.082A9 9 0 1015.68 4.534a7.46 7.46 0 01-2.717-2.248zM15.75 14.25a3.75 3.75 0 11-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 011.925-3.545 3.75 3.75 0 013.255 3.717z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            Winstreak Leaderboard
-          </h1>
-
-          <table className="table my-2 bg-[#e83c3c]  rounded-lg text-white">
-            <thead className="text-white">
-              <tr className="bg-[#c73232] rounded-lg">
-                <th>No</th>
-                <th>Name</th>
-                <th>Winstreak</th>
-              </tr>
-            </thead>
-            <tbody>
-              {winstreakUsers.map((user, index) => (
-                <tr key={user.id}>
-                  <td>{index + 1}</td>
-                  <td>{user.name}</td>
-                  <td>{user.winstreak}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Pagination
-            currentPage={winstreakCurrentPage}
-            itemsPerPage={winstreakItemsPerPage}
-            totalItems={users.length}
-            handlePageChange={winstreakHandlePageChange}
           />
         </section>
         <RightDetail />

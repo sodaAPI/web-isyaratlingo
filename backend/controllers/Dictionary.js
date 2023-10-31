@@ -26,12 +26,13 @@ export const getVocabByUUID = async (req, res) => {
 };
 
 export const createVocab = async (req, res) => {
-  const { name, categories } = req.body;
+  const { name, categories, src } = req.body;
   try {
     await Dictionary.create({
       name: name,
       image: req.file.path,
       categories: categories,
+      src: src,
     });
     res.status(201).json({ msg: "Item Created Successfully" });
   } catch (error) {
@@ -46,40 +47,56 @@ export const updateVocab = async (req, res) => {
     },
   });
   if (!vocab) return res.status(404).json({ msg: "Item not found" });
-  const { name, categories } = req.body;
+  const { name, categories, src } = req.body;
+  
+  // Define an object to store the updated fields
+  const updateFields = {};
+
+  // Check if a new value is provided for each field and update it if not empty
+  if (name !== undefined) {
+    updateFields.name = name;
+  } else {
+    updateFields.name = vocab.name; // Use the existing name
+  }
+
+  if (categories !== undefined) {
+    updateFields.categories = categories;
+  } else {
+    updateFields.categories = vocab.categories; // Use the existing categories
+  }
+  
+  if (src !== undefined) {
+    updateFields.src = src;
+  } else {
+    updateFields.src = vocab.src; // Use the existing src
+  }
+
   try {
     if (req.roles === "admin") {
-      await Dictionary.update(
-        {
-          name: name,
-          image: req.file.path,
-          categories: categories,
-        },
-        {
-          where: {
-            uuid: vocab.uuid,
-          },
-        }
-      );
+      if (req.file) {
+        updateFields.image = req.file.path; // Set the image field only if req.file is provided
+      } else {
+        updateFields.image = vocab.image; // Use the existing image
+      }
     } else {
-      await Dictionary.update(
-        {
-          name: name,
-          image: image,
-          categories: categories,
-        },
-        {
-          where: {
-            uuid: vocab.uuid,
-          },
-        }
-      );
+      updateFields.image = vocab.image; // Use the existing image
     }
+
+    await Dictionary.update(
+      updateFields, // Use the defined updateFields object
+      {
+        where: {
+          uuid: vocab.uuid,
+        },
+      }
+    );
+
     res.status(200).json({ msg: "Item Updated" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }
 };
+
 
 const formatTimestamp = (timestamp) => {
   const options = {

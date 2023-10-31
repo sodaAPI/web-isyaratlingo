@@ -104,8 +104,7 @@ export default function ChangePassword() {
               </div>
             </div>
 
-            <button
-              className="flex flex-row gap-2 btn-register hover:bg-green-500 px-8 py-4 rounded-3xl font-bold text-white">
+            <button className="flex flex-row gap-2 btn-register hover:bg-green-500 px-8 py-4 rounded-3xl font-bold text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"

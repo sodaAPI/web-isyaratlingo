@@ -115,7 +115,6 @@ export default function EditProfile() {
                   placeholder={user && user.name}
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  required
                 />
               </div>
 
@@ -128,7 +127,6 @@ export default function EditProfile() {
                   placeholder={user && user.email}
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
-                  required
                 />
               </div>
 
@@ -141,13 +139,11 @@ export default function EditProfile() {
                   placeholder={user && user.age}
                   value={age}
                   onChange={(event) => setAge(event.target.value)}
-                  required
                 />
               </div>
             </div>
 
-            <button
-              className="flex flex-row gap-2 btn-register hover:bg-green-500 px-8 py-4 rounded-3xl font-bold text-white">
+            <button className="flex flex-row gap-2 btn-register hover:bg-green-500 px-8 py-4 rounded-3xl font-bold text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"

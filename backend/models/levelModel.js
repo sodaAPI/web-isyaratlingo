@@ -1,5 +1,8 @@
 import { Sequelize } from "sequelize";
 import db from "../config/database.js";
+import Learn from "./learnModel.js";
+import Lesson from "./lessonModel.js";
+import User from "./userModel.js";
 
 const { DataTypes } = Sequelize;
 
@@ -21,5 +24,7 @@ const Level = db.define(
     freezeTableName: true,
   }
 );
-await Level.sync();
+
+
+
 export default Level;

@@ -1,6 +1,6 @@
-import { useState} from "react";
+import { useState } from "react";
 import axios from "axios";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/SidebarLearning";
 
 export default function addShop() {
@@ -22,7 +22,6 @@ export default function addShop() {
     navigate(path);
     window.alert("User Added Successfully");
   };
-
 
   return (
     <div className="flex flex-col">
@@ -48,7 +47,7 @@ export default function addShop() {
                 />
               </div>
 
-            {/* Price */}
+              {/* Price */}
 
               <div>
                 <label className="label  font-bold">Price</label>
@@ -62,7 +61,7 @@ export default function addShop() {
                 />
               </div>
 
-            {/* Image */}
+              {/* Image */}
 
               <div>
                 <label className="label  font-bold">Image</label>

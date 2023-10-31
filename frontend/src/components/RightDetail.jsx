@@ -62,11 +62,11 @@ export default function RightDetail() {
               clip-rule="evenodd"
             />
           </svg>
-          {user && user.guard}
+          {user && user.guard - 1}
           <a>Guards</a>
         </a>
 
-        <a className="flex flex-row items-center text-slate-500 gap-2">
+        {/* <a className="flex flex-row items-center text-slate-500 gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -80,7 +80,7 @@ export default function RightDetail() {
           </svg>
           {user && user.winstreak}
           <a>Winstreak</a>
-        </a>
+        </a> */}
       </div>
 
       {/* Leaderboard */}
